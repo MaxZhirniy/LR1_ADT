@@ -1,0 +1,7 @@
+/build/
+/dbms
+/dbms-rust
+/rust/target/
+*.data
+*.data.tmp
+*.docx
