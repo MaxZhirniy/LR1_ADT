@@ -13,16 +13,20 @@ char kindOf(const Container& c) {
 Container makeContainer(char k) {
     switch (k) { case 'M': return Array{}; case 'F': return ForwardList{}; case 'L': return DoublyList{}; case 'S': return Stack{}; case 'Q': return Queue{}; case 'T': return AvlTree{}; default: throw invalid_argument("unknown structure type"); }
 }
-vector<int> getValues(const Container& c) {
+vector<string> getValues(const Container& c) {
+    if (kindOf(c) == 'M') return get<Array>(c).values();
+    vector<int> numbers;
     switch (kindOf(c)) {
-        case 'M': return get<Array>(c).values();
-        case 'F': return get<ForwardList>(c).values();
-        case 'L': return get<DoublyList>(c).values();
-        case 'S': return get<Stack>(c).values();
-        case 'Q': return get<Queue>(c).values();
-        case 'T': return get<AvlTree>(c).values();
+        case 'F': numbers = get<ForwardList>(c).values(); break;
+        case 'L': numbers = get<DoublyList>(c).values(); break;
+        case 'S': numbers = get<Stack>(c).values(); break;
+        case 'Q': numbers = get<Queue>(c).values(); break;
+        case 'T': numbers = get<AvlTree>(c).values(); break;
         default: throw invalid_argument("unknown structure type");
     }
+    vector<string> result;
+    for (int value : numbers) result.push_back(to_string(value));
+    return result;
 }
 void saveData(const string& path, const Database& db) {
     const string tmp = path + ".tmp";
@@ -31,10 +35,10 @@ void saveData(const string& path, const Database& db) {
     for (Database::const_iterator it = db.begin(); it != db.end(); ++it) {
         const string& name = it->first;
         const Container& data = it->second;
-        vector<int> values = getValues(data);
+        vector<string> values = getValues(data);
         if (kindOf(data) == 'S') reverse(values.begin(), values.end());
         out << kindOf(data) << ' ' << name << ' ' << values.size();
-        for (int value : values) out << ' ' << value;
+        for (const string& value : values) out << ' ' << value;
         out << '\n';
     }
     out.close();
@@ -56,14 +60,19 @@ void loadData(const string& path, Database& db) {
         if (!(row >> type >> name >> n) || n > 1000000 || (type != 'M' && type != 'F' && type != 'L' && type != 'S' && type != 'Q' && type != 'T') || db.count(name)) throw runtime_error("invalid data file, line " + to_string(lineNumber));
         Container data = makeContainer(type);
         for (size_t i = 0; i < n; i++) {
-            int value;
-            if (!(row >> value)) throw runtime_error("truncated data file, line " + to_string(lineNumber));
-            if (type == 'M') get<Array>(data).push(value);
-            else if (type == 'F') get<ForwardList>(data).pushBack(value);
-            else if (type == 'L') get<DoublyList>(data).pushBack(value);
-            else if (type == 'S') get<Stack>(data).push(value);
-            else if (type == 'Q') get<Queue>(data).push(value);
-            else if (!get<AvlTree>(data).insert(value)) throw runtime_error("duplicate tree key in file");
+            if (type == 'M'){
+                string value;
+                if (!(row >> value)) throw runtime_error("truncated data file, line " + to_string(lineNumber));
+                get<Array>(data).push(value);
+            } else {
+                int value;
+                if (!(row >> value)) throw runtime_error("truncated data file, line " + to_string(lineNumber));
+                if (type == 'F') get<ForwardList>(data).pushBack(value);
+                else if (type == 'L') get<DoublyList>(data).pushBack(value);
+                else if (type == 'S') get<Stack>(data).push(value);
+                else if (type == 'Q') get<Queue>(data).push(value);
+                else if (!get<AvlTree>(data).insert(value)) throw runtime_error("duplicate tree key in file");
+            }
         }
         string extra;
         if (row >> extra) throw runtime_error("extra data in file, line " + to_string(lineNumber));

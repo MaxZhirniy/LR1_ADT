@@ -22,6 +22,6 @@ using Database = std::map<std::string, Container>;
 
 char kindOf(const Container& data);
 Container makeContainer(char type);
-std::vector<int> getValues(const Container& data);
+std::vector<std::string> getValues(const Container& data);
 void loadData(const std::string& path, Database& db);
 void saveData(const std::string& path, const Database& db);

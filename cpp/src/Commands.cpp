@@ -6,13 +6,18 @@
 #include <utility>
 using namespace std;
 
-static string join(const vector<int>& values) {
+static string join(const vector<string>& values) {
     string text = "[";
     for (size_t i = 0; i < values.size(); i++) {
         if (i) text += " ";
-        text += to_string(values[i]);
+        text += values[i];
     }
     return text + "]";
+}
+static string join(const vector<int>& values) {
+    vector<string> result;
+    for (int value : values) result.push_back(to_string(value));
+    return join(result);
 }
 
 string upperText(string s) { for (char& c : s) c = static_cast<char>(toupper(static_cast<unsigned char>(c))); return s; }
@@ -81,11 +86,11 @@ string runCommand(Database& db, const string& command, bool& changed) {
     if (op.empty() || op[0] != k) throw invalid_argument("command does not match structure type");
     if (k == 'M') {
         Array& a = get<Array>(data);
-        if (op == "MPUSH") { int value = integer(arg(in)); endArgs(in); a.push(value); changed = true; return "OK"; }
-        if (op == "MINSERT") { size_t i = indexOf(arg(in)); int value = integer(arg(in)); endArgs(in); a.insert(i, value); changed = true; return "OK"; }
-        if (op == "MDEL") { size_t i = indexOf(arg(in)); endArgs(in); int value = a.erase(i); changed = true; return to_string(value); }
-        if (op == "MSET") { size_t i = indexOf(arg(in)); int value = integer(arg(in)); endArgs(in); a.set(i, value); changed = true; return "OK"; }
-        if (op == "MGET") { size_t i = indexOf(arg(in)); endArgs(in); return to_string(a.get(i)); }
+        if (op == "MPUSH") { string value = arg(in); endArgs(in); a.push(value); changed = true; return "OK"; }
+        if (op == "MINSERT") { size_t i = indexOf(arg(in)); string value = arg(in); endArgs(in); a.insert(i, value); changed = true; return "OK"; }
+        if (op == "MDEL") { size_t i = indexOf(arg(in)); endArgs(in); string value = a.erase(i); changed = true; return value; }
+        if (op == "MSET") { size_t i = indexOf(arg(in)); string value = arg(in); endArgs(in); a.set(i, value); changed = true; return "OK"; }
+        if (op == "MGET") { size_t i = indexOf(arg(in)); endArgs(in); return a.get(i); }
         if (op == "MLEN") { endArgs(in); return to_string(a.size()); }
         if (op == "MREAD") { endArgs(in); return join(a.values()); }
     }
