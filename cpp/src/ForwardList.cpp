@@ -43,14 +43,14 @@ ForwardList::Node* ForwardList::locate(std::size_t index) const {
 }
 
 std::size_t ForwardList::size() const { return len; }
-void ForwardList::pushFront(int value) {
+void ForwardList::pushFront(const std::string& value) {
     Node* node = new Node{value, head};
     head = node;
     if (tail == nullptr) tail = node;
     len++;
 }
 
-void ForwardList::pushBack(int value) {
+void ForwardList::pushBack(const std::string& value) {
     if (tail == nullptr) { pushFront(value); return; }
     Node* node = new Node{value, nullptr};
     tail->next = node;
@@ -58,7 +58,7 @@ void ForwardList::pushBack(int value) {
     len++;
 }
 
-void ForwardList::insert(const std::string& where, int target, int value) {
+void ForwardList::insert(const std::string& where, const std::string& target, const std::string& value) {
     if (where != "BEFORE" && where != "AFTER") throw std::invalid_argument("invalid position");
     if (head == nullptr) throw std::invalid_argument("target not found");
     if (where == "BEFORE" && head->value == target){
@@ -85,17 +85,17 @@ void ForwardList::insert(const std::string& where, int target, int value) {
     throw std::invalid_argument("target not found");
 }
 
-int ForwardList::unlink(Node* previous, Node* node){
+std::string ForwardList::unlink(Node* previous, Node* node){
     if (previous == nullptr) head = node->next;
     else previous->next = node->next;
     if (tail == node) tail = previous;
-    int value = node->value;
+    std::string value = node->value;
     delete node;
     len--;
     return value;
 }
 
-int ForwardList::erase(const std::string& where, int target){
+std::string ForwardList::erase(const std::string& where, const std::string& target){
     if (where != "HEAD" && where != "TAIL" && where != "BEFORE" && where != "AFTER")
         throw std::invalid_argument("invalid position");
     if (head == nullptr) throw std::out_of_range("list is empty");
@@ -126,8 +126,8 @@ int ForwardList::erase(const std::string& where, int target){
     return unlink(current, current->next);
 }
 
-int ForwardList::get(std::size_t index) const { return locate(index)->value; }
-std::ptrdiff_t ForwardList::find(int value) const {
+std::string ForwardList::get(std::size_t index) const { return locate(index)->value; }
+std::ptrdiff_t ForwardList::find(const std::string& value) const {
     std::ptrdiff_t index = 0;
     for (Node* node = head; node != nullptr; node = node->next, index++) {
         if (node->value == value) return index;
@@ -135,7 +135,7 @@ std::ptrdiff_t ForwardList::find(int value) const {
     return -1;
 }
 
-bool ForwardList::remove(int value){
+bool ForwardList::remove(const std::string& value){
     Node* previous = nullptr;
     Node* current = head;
     while (current != nullptr && current->value != value){
@@ -147,8 +147,8 @@ bool ForwardList::remove(int value){
     return true;
 }
 
-std::vector<int> ForwardList::values() const {
-    std::vector<int> result;
+std::vector<std::string> ForwardList::values() const {
+    std::vector<std::string> result;
     for (Node* node = head; node != nullptr; node = node->next) result.push_back(node->value);
     return result;
 }

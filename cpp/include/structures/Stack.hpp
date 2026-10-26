@@ -1,10 +1,11 @@
 #pragma once
 #include <vector>
+#include <string>
 
 namespace adt {
 class Stack {
     struct Node {
-        int value;
+        std::string value;
         Node* next;
     };
     Node* topNode;
@@ -17,9 +18,9 @@ public:
     Stack(Stack&& other) noexcept;
     Stack& operator=(Stack&& other) noexcept;
 
-    void push(int value);
-    int pop();
-    int top() const;
-    std::vector<int> values() const;
+    void push(const std::string& value);
+    std::string pop();
+    std::string top() const;
+    std::vector<std::string> values() const;
 };
 }

@@ -30,7 +30,7 @@ impl Container {
         match self { Self::Array(_) => 'M', Self::Forward(_) => 'F',
             Self::Doubly(_) => 'L', Self::Stack(_) => 'S', Self::Queue(_) => 'Q' }
     }
-    pub fn values(&self) -> Vec<i32> {
+    pub fn values(&self) -> Vec<String> {
         match self { Self::Array(x) => x.values(), Self::Forward(x) => x.values(false),
             Self::Doubly(x) => x.values(false), Self::Stack(x) => x.values(),
             Self::Queue(x) => x.values() }
@@ -58,11 +58,11 @@ pub fn load(path: &Path) -> Result<Database, String> {
         if db.contains_key(name) { return Err("duplicate structure name".into()); }
         let mut c = Container::new(kind)?;
         for field in &parts[3..] {
-            let value: i32 = field.parse().map_err(|_| format!("invalid i32 value: {field}"))?;
+            let value = field.to_string();
             match &mut c {
                 Container::Array(x) => x.push(value),
-                Container::Forward(x) => x.insert(x.len(), value)?,
-                Container::Doubly(x) => x.insert(x.len(), value)?,
+                Container::Forward(x) => x.push_back(value),
+                Container::Doubly(x) => x.push_back(value),
                 Container::Stack(x) => x.push(value),
                 Container::Queue(x) => x.push(value),
             }

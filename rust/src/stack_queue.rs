@@ -1,19 +1,14 @@
 use crate::forward_list::ForwardList;
-
-/// Стек LIFO на односвязном списке; push/pop работают за O(1).
 #[derive(Default)]
 pub struct Stack { items: ForwardList }
 impl Stack {
-    pub fn push(&mut self, value: i32) { self.items.insert(0, value).unwrap(); }
-    pub fn pop(&mut self) -> Result<i32, String> { self.items.erase(0) }
-    pub fn top(&self) -> Result<i32, String> { self.items.get(0) }
-    pub fn values(&self) -> Vec<i32> { self.items.values(false) }
+    pub fn push(&mut self, value: String) { self.items.insert(0, value).unwrap(); }
+    pub fn pop(&mut self) -> Result<String, String> { self.items.erase(0) }
+    pub fn top(&self) -> Result<String, String> { self.items.get(0) }
+    pub fn values(&self) -> Vec<String> { self.items.values(false) }
 }
-
-/// Очередь FIFO в собственном циклическом буфере.
-/// Push амортизированно O(1), pop O(1); расширение в 2 раза.
 pub struct Queue {
-    buf: Vec<Option<i32>>,
+    buf: Vec<Option<String>>,
     head: usize,
     size: usize,
 }
@@ -30,24 +25,24 @@ impl Queue {
         self.buf = next;
         self.head = 0;
     }
-    pub fn push(&mut self, value: i32) {
+    pub fn push(&mut self, value: String) {
         if self.size == self.buf.len() { self.grow(); }
         let index = (self.head + self.size) % self.buf.len();
         self.buf[index] = Some(value);
         self.size += 1;
     }
-    pub fn pop(&mut self) -> Result<i32, String> {
+    pub fn pop(&mut self) -> Result<String, String> {
         if self.size == 0 { return Err("queue is empty".into()); }
         let value = self.buf[self.head].take().unwrap();
         self.head = (self.head + 1) % self.buf.len();
         self.size -= 1;
         Ok(value)
     }
-    pub fn front(&self) -> Result<i32, String> {
+    pub fn front(&self) -> Result<String, String> {
         if self.size == 0 { return Err("queue is empty".into()); }
-        Ok(self.buf[self.head].unwrap())
+        Ok(self.buf[self.head].as_ref().unwrap().clone())
     }
-    pub fn values(&self) -> Vec<i32> {
-        (0..self.size).map(|i| self.buf[(self.head + i) % self.buf.len()].unwrap()).collect()
+    pub fn values(&self) -> Vec<String> {
+        (0..self.size).map(|i| self.buf[(self.head + i) % self.buf.len()].as_ref().unwrap().clone()).collect()
     }
 }

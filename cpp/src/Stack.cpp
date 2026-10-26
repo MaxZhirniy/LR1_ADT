@@ -19,21 +19,21 @@ Stack& Stack::operator=(Stack&& other) noexcept {
     other.topNode = nullptr;
     return *this;
 }
-void Stack::push(int value) { topNode = new Node{value, topNode}; }
-int Stack::pop() {
+void Stack::push(const std::string& value) { topNode = new Node{value, topNode}; }
+std::string Stack::pop() {
     if (topNode == nullptr) throw std::out_of_range("stack is empty");
     Node* node = topNode;
-    int value = node->value;
+    std::string value = node->value;
     topNode = node->next;
     delete node;
     return value;
 }
-int Stack::top() const {
+std::string Stack::top() const {
     if (topNode == nullptr) throw std::out_of_range("stack is empty");
     return topNode->value;
 }
-std::vector<int> Stack::values() const {
-    std::vector<int> result;
+std::vector<std::string> Stack::values() const {
+    std::vector<std::string> result;
     for (Node* node = topNode; node != nullptr; node = node->next) result.push_back(node->value);
     return result;
 }

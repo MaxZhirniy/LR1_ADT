@@ -25,27 +25,27 @@ Queue& Queue::operator=(Queue&& other) noexcept {
     other.tail = nullptr;
     return *this;
 }
-void Queue::push(int value) {
+void Queue::push(const std::string& value) {
     Node* node = new Node{value, nullptr};
     if (tail != nullptr) tail->next = node;
     else head = node;
     tail = node;
 }
-int Queue::pop() {
+std::string Queue::pop() {
     if (head == nullptr) throw std::out_of_range("queue is empty");
     Node* node = head;
-    int value = node->value;
+    std::string value = node->value;
     head = node->next;
     if (head == nullptr) tail = nullptr;
     delete node;
     return value;
 }
-int Queue::front() const {
+std::string Queue::front() const {
     if (head == nullptr) throw std::out_of_range("queue is empty");
     return head->value;
 }
-std::vector<int> Queue::values() const {
-    std::vector<int> result;
+std::vector<std::string> Queue::values() const {
+    std::vector<std::string> result;
     for (Node* node = head; node != nullptr; node = node->next) result.push_back(node->value);
     return result;
 }

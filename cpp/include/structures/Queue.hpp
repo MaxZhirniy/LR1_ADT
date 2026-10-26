@@ -1,10 +1,11 @@
 #pragma once
 #include <vector>
+#include <string>
 
 namespace adt {
 class Queue {
     struct Node {
-        int value;
+        std::string value;
         Node* next;
     };
     Node* head;
@@ -18,9 +19,9 @@ public:
     Queue(Queue&& other) noexcept;
     Queue& operator=(Queue&& other) noexcept;
 
-    void push(int value);
-    int pop();
-    int front() const;
-    std::vector<int> values() const;
+    void push(const std::string& value);
+    std::string pop();
+    std::string front() const;
+    std::vector<std::string> values() const;
 };
 }

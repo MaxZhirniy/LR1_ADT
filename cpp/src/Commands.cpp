@@ -99,16 +99,16 @@ string runCommand(Database& db, const string& command, bool& changed) {
         size_t n = forward ? get<ForwardList>(data).size() : get<DoublyList>(data).size();
         const string prefix(1, k);
         if (op == prefix + "PUSH") {
-            int value = integer(arg(in)); endArgs(in);
+            string value = arg(in); endArgs(in);
             if (forward) get<ForwardList>(data).pushBack(value);
             else get<DoublyList>(data).pushBack(value);
             changed = true; return "OK";
         }
         if (op == prefix + "INSERT"){
             string where = upperText(arg(in));
-            int target = 0;
-            if (where == "BEFORE" || where == "AFTER") target = integer(arg(in));
-            int value = integer(arg(in));
+            string target;
+            if (where == "BEFORE" || where == "AFTER") target = arg(in);
+            string value = arg(in);
             endArgs(in);
             if (forward) get<ForwardList>(data).insert(where, target, value);
             else get<DoublyList>(data).insert(where, target, value);
@@ -117,25 +117,25 @@ string runCommand(Database& db, const string& command, bool& changed) {
         }
         if (op == prefix + "DEL"){
             string where = upperText(arg(in));
-            int target = 0;
-            if (where == "BEFORE" || where == "AFTER") target = integer(arg(in));
+            string target;
+            if (where == "BEFORE" || where == "AFTER") target = arg(in);
             endArgs(in);
-            int value = forward ? get<ForwardList>(data).erase(where, target) : get<DoublyList>(data).erase(where, target);
+            string value = forward ? get<ForwardList>(data).erase(where, target) : get<DoublyList>(data).erase(where, target);
             changed = true;
-            return to_string(value);
+            return value;
         }
         if (op == prefix + "REMOVE") {
-            int value = integer(arg(in)); endArgs(in);
+            string value = arg(in); endArgs(in);
             bool ok = forward ? get<ForwardList>(data).remove(value) : get<DoublyList>(data).remove(value);
             changed = ok; return ok ? "TRUE" : "FALSE";
         }
         if (op == prefix + "FIND") {
-            int value = integer(arg(in)); endArgs(in);
+            string value = arg(in); endArgs(in);
             return to_string(forward ? get<ForwardList>(data).find(value) : get<DoublyList>(data).find(value));
         }
         if (op == prefix + "GET") {
             size_t i = indexOf(arg(in)); endArgs(in);
-            return to_string(forward ? get<ForwardList>(data).get(i) : get<DoublyList>(data).get(i));
+            return forward ? get<ForwardList>(data).get(i) : get<DoublyList>(data).get(i);
         }
         if (op == prefix + "READ") {
             string mode = "FORWARD";
@@ -143,23 +143,23 @@ string runCommand(Database& db, const string& command, bool& changed) {
             mode = upperText(mode);
             endArgs(in);
             if (mode != "FORWARD" && mode != "REVERSE") throw invalid_argument("read mode: FORWARD or REVERSE");
-            vector<int> values = forward ? get<ForwardList>(data).values() : get<DoublyList>(data).values(mode == "REVERSE");
+            vector<string> values = forward ? get<ForwardList>(data).values() : get<DoublyList>(data).values(mode == "REVERSE");
             if (forward && mode == "REVERSE") reverse(values.begin(), values.end());
             return join(values);
         }
     }
     if (k == 'S') {
         Stack& s = get<Stack>(data);
-        if (op == "SPUSH") { int v = integer(arg(in)); endArgs(in); s.push(v); changed = true; return "OK"; }
-        if (op == "SPOP") { endArgs(in); int v = s.pop(); changed = true; return to_string(v); }
-        if (op == "SGET") { endArgs(in); return to_string(s.top()); }
+        if (op == "SPUSH") { string v = arg(in); endArgs(in); s.push(v); changed = true; return "OK"; }
+        if (op == "SPOP") { endArgs(in); string v = s.pop(); changed = true; return v; }
+        if (op == "SGET") { endArgs(in); return s.top(); }
         if (op == "SREAD") { endArgs(in); return join(s.values()); }
     }
     if (k == 'Q') {
         Queue& q = get<Queue>(data);
-        if (op == "QPUSH") { int v = integer(arg(in)); endArgs(in); q.push(v); changed = true; return "OK"; }
-        if (op == "QPOP") { endArgs(in); int v = q.pop(); changed = true; return to_string(v); }
-        if (op == "QGET") { endArgs(in); return to_string(q.front()); }
+        if (op == "QPUSH") { string v = arg(in); endArgs(in); q.push(v); changed = true; return "OK"; }
+        if (op == "QPOP") { endArgs(in); string v = q.pop(); changed = true; return v; }
+        if (op == "QGET") { endArgs(in); return q.front(); }
         if (op == "QREAD") { endArgs(in); return join(q.values()); }
     }
     if (k == 'T') {
