@@ -99,25 +99,25 @@ string runCommand(Database& db, const string& command, bool& changed) {
             else get<DoublyList>(data).pushBack(value);
             changed = true; return "OK";
         }
-        if (op == prefix + "INSERT") {
+        if (op == prefix + "INSERT"){
             string where = upperText(arg(in));
-            size_t ref = 0;
-            if (where == "BEFORE" || where == "AFTER") ref = indexOf(arg(in));
-            int value = integer(arg(in)); endArgs(in);
-            size_t i = position(where, ref, n, true);
-            if (forward) get<ForwardList>(data).insert(i, value);
-            else get<DoublyList>(data).insert(i, value);
-            changed = true; return "OK";
-        }
-        if (op == prefix + "DEL") {
-            string where = upperText(arg(in));
-            size_t ref = 0;
-            if (where == "BEFORE" || where == "AFTER") ref = indexOf(arg(in));
+            int target = 0;
+            if (where == "BEFORE" || where == "AFTER") target = integer(arg(in));
+            int value = integer(arg(in));
             endArgs(in);
-            if (!n) throw out_of_range("list is empty");
-            size_t i = position(where, ref, n, false);
-            int value = forward ? get<ForwardList>(data).erase(i) : get<DoublyList>(data).erase(i);
-            changed = true; return to_string(value);
+            if (forward) get<ForwardList>(data).insert(where, target, value);
+            else get<DoublyList>(data).insert(where, target, value);
+            changed = true;
+            return "OK";
+        }
+        if (op == prefix + "DEL"){
+            string where = upperText(arg(in));
+            int target = 0;
+            if (where == "BEFORE" || where == "AFTER") target = integer(arg(in));
+            endArgs(in);
+            int value = forward ? get<ForwardList>(data).erase(where, target) : get<DoublyList>(data).erase(where, target);
+            changed = true;
+            return to_string(value);
         }
         if (op == prefix + "REMOVE") {
             int value = integer(arg(in)); endArgs(in);

@@ -13,11 +13,13 @@ void DoublyList::clear() {
     tail = nullptr;
     len = 0;
 }
+
 DoublyList::DoublyList(DoublyList&& other) noexcept : head(other.head), tail(other.tail), len(other.len) {
     other.head = nullptr;
     other.tail = nullptr;
     other.len = 0;
 }
+
 DoublyList& DoublyList::operator=(DoublyList&& other) noexcept {
     if (this == &other) return *this;
     clear();
@@ -29,6 +31,7 @@ DoublyList& DoublyList::operator=(DoublyList&& other) noexcept {
     other.len = 0;
     return *this;
 }
+
 DoublyList::Node* DoublyList::locate(std::size_t index) const {
     if (index >= len) throw std::out_of_range("index out of range");
     if (index < len / 2) {
@@ -40,6 +43,7 @@ DoublyList::Node* DoublyList::locate(std::size_t index) const {
     for (std::size_t i = len - 1; i > index; i--) node = node->prev;
     return node;
 }
+
 std::size_t DoublyList::size() const { return len; }
 void DoublyList::pushFront(int value) {
     Node* node = new Node{value, nullptr, head};
@@ -48,6 +52,7 @@ void DoublyList::pushFront(int value) {
     head = node;
     len++;
 }
+
 void DoublyList::pushBack(int value) {
     if (tail == nullptr) { pushFront(value); return; }
     Node* node = new Node{value, tail, nullptr};
@@ -55,19 +60,31 @@ void DoublyList::pushBack(int value) {
     tail = node;
     len++;
 }
-void DoublyList::insert(std::size_t index, int value) {
-    if (index > len) throw std::out_of_range("index out of range");
-    if (index == 0) { pushFront(value); return; }
-    if (index == len) { pushBack(value); return; }
-    Node* curr = locate(index);
-    Node* prev = curr->prev;
-    Node* node = new Node{value, prev, curr};
-    prev->next = node;
-    curr->prev = node;
+
+void DoublyList::insert(const std::string& where, int target, int value){
+    if (where == "HEAD") { pushFront(value); return; }
+    if (where == "TAIL") { pushBack(value); return; }
+    if (where != "BEFORE" && where != "AFTER")
+        throw std::invalid_argument("invalid position");
+    Node* current = head;
+    while (current != nullptr && current->value != target)
+        current = current->next;
+    if (current == nullptr) throw std::invalid_argument("target not found");
+    if (where == "BEFORE"){
+        Node* insertion = new Node{value, current->prev, current};
+        if (current->prev != nullptr) current->prev->next = insertion;
+        else head = insertion;
+        current->prev = insertion;
+    } else {
+        Node* insertion = new Node{value, current, current->next};
+        if (current->next != nullptr) current->next->prev = insertion;
+        else tail = insertion;
+        current->next = insertion;
+    }
     len++;
 }
-int DoublyList::erase(std::size_t index) {
-    Node* node = locate(index);
+
+int DoublyList::unlink(Node* node){
     if (node->prev != nullptr) node->prev->next = node->next;
     else head = node->next;
     if (node->next != nullptr) node->next->prev = node->prev;
@@ -77,6 +94,27 @@ int DoublyList::erase(std::size_t index) {
     len--;
     return value;
 }
+
+int DoublyList::erase(const std::string& where, int target){
+    if (where != "HEAD" && where != "TAIL" && where != "BEFORE" && where != "AFTER")
+        throw std::invalid_argument("invalid position");
+    if (head == nullptr) throw std::out_of_range("list is empty");
+    if (where == "HEAD") return unlink(head);
+    if (where == "TAIL") return unlink(tail);
+    Node* current = head;
+    while (current != nullptr && current->value != target)
+        current = current->next;
+    if (current == nullptr) throw std::invalid_argument("target not found");
+    if (where == "BEFORE"){
+        if (current->prev == nullptr)
+            throw std::out_of_range("no element before target");
+        return unlink(current->prev);
+    }
+    if (current->next == nullptr)
+        throw std::out_of_range("no element after target");
+    return unlink(current->next);
+}
+
 int DoublyList::get(std::size_t index) const { return locate(index)->value; }
 std::ptrdiff_t DoublyList::find(int value) const {
     std::ptrdiff_t index = 0;
@@ -85,12 +123,17 @@ std::ptrdiff_t DoublyList::find(int value) const {
     }
     return -1;
 }
-bool DoublyList::remove(int value) {
-    std::ptrdiff_t index = find(value);
-    if (index == -1) return false;
-    erase(static_cast<std::size_t>(index));
+
+bool DoublyList::remove(int value){
+    Node* current = head;
+    while (current != nullptr && current->value != value){
+        current = current->next;
+    }
+    if (current == nullptr) return false;
+    unlink(current);
     return true;
 }
+
 std::vector<int> DoublyList::values(bool reverse) const {
     std::vector<int> result;
     if (reverse) {

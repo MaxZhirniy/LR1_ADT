@@ -1,7 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <vector>
-
+#include <string>
 namespace adt {
 class ForwardList {
     struct Node {
@@ -13,6 +13,7 @@ class ForwardList {
     std::size_t len;
     Node* locate(std::size_t index) const;
     void clear();
+    int unlink(Node* previous, Node* node);
 public:
     ForwardList();
     ~ForwardList();
@@ -24,8 +25,8 @@ public:
     std::size_t size() const;
     void pushFront(int value);
     void pushBack(int value);
-    void insert(std::size_t index, int value);
-    int erase(std::size_t index);
+    void insert(const std::string& where, int target, int value);
+    int erase(const std::string& where, int target = 0);
     int get(std::size_t index) const;
     std::ptrdiff_t find(int value) const;
     bool remove(int value);
